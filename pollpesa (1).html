@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PollPesa</title>
+<style>
+:root{--bg:#f6f8fb;--card:#fff;--fg:#0f1a2b;--mut:#5b6678;--ac:#1a6dff;--bd:#dfe5ee;--ok:#12a150;--wn:#c77700;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b0f1a;--card:#131a2a;--fg:#e8ecf5;--mut:#9aa5bb;--ac:#4da3ff;--bd:#25304a;--ok:#3ddc97;--wn:#ffb020}}
+:root[data-theme="dark"]{--bg:#0b0f1a;--card:#131a2a;--fg:#e8ecf5;--mut:#9aa5bb;--ac:#4da3ff;--bd:#25304a;--ok:#3ddc97;--wn:#ffb020}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif}
+main{max-width:560px;margin:0 auto;padding:16px 16px 110px}
+.bal{background:linear-gradient(135deg,#1a6dff,#0b3fa8);color:#fff;border-radius:20px;padding:20px;margin-bottom:14px}
+.bal small{opacity:.85}.bal .n{font-size:34px;font-weight:700}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--bd);display:flex;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));gap:8px;z-index:3}
+nav button{flex:1;border:0;background:none;color:var(--mut);padding:8px;border-radius:12px;font:600 14px system-ui;cursor:pointer}
+nav button.on{color:var(--ac);background:rgba(26,109,255,.1)}
+nav span{display:block;font-size:20px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:12px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+h2{font-size:18px;margin:0 0 4px}
+.rw{color:var(--ok);font-weight:700}.mut{color:var(--mut);font-size:14px}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:12px;padding:12px 18px;font:600 15px system-ui;cursor:pointer}
+.btn.w{width:100%;margin-top:14px;padding:14px}
+.btn[disabled]{opacity:.45}
+.opt{display:block;width:100%;text-align:left;border:2px solid var(--bd);background:none;color:var(--fg);border-radius:12px;padding:12px;margin-top:8px;font:inherit;cursor:pointer}
+.opt.sel{border-color:var(--ac)}
+label{display:block;font-size:14px;color:var(--mut);margin:10px 0 4px}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--fg);font:inherit}
+.bar{height:6px;background:var(--bd);border-radius:3px;margin:10px 0}.bar i{display:block;height:100%;background:var(--ac);border-radius:3px}
+.sum{background:var(--bg);border-radius:10px;padding:10px 12px;margin-top:12px;font-size:14px}
+.sum div{display:flex;justify-content:space-between;padding:2px 0}
+.tx{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd)}
+.tx:last-child{border:0}.tx small{color:var(--mut)}
+.in{color:var(--ok);font-weight:600}
+.pill{font-size:12px;padding:2px 8px;border-radius:10px;background:var(--bd);color:var(--wn)}
+.done{opacity:.55}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:14px}.logo b{font-size:22px;letter-spacing:-.3px}.logo i{font-style:normal;color:var(--ac)}
+.how ol{margin:6px 0 0;padding-left:20px}.how li{margin:6px 0}
+</style></head><body><main>
+<div class="logo"><svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="10" fill="#1a6dff"/><path d="M9 11h18a2 2 0 012 2v9a2 2 0 01-2 2H18l-5 4v-4H9a2 2 0 01-2-2v-9a2 2 0 012-2z" fill="#fff"/><path d="M13 18l3.5 3.5L23 15" stroke="#1a6dff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><b>Poll<i>Pesa</i></b></div>
+<div class="bal"><small id="side">Earn</small><div class="n" id="bal"></div><small id="lim"></small></div>
+<div id="v"></div>
+<div class="card how"><h2>How PollPesa works</h2><ol><li><b>Joining is free.</b> There are no sign-up fees, ever.</li><li><b>Answer surveys.</b> Businesses pay to ask questions, and you earn a reward for each one you finish.</li><li><b>Withdraw to M-Pesa.</b> Cash out from KES 200 (KES 10 fee). Requests are reviewed before they are sent.</li></ol></div>
+<p class="mut">Prototype: balances are saved on this device only. Real payouts need a backend and funds from survey sponsors.</p>
+</main>
+<nav><button class="on" data-t="e"><span>📝</span>Earn</button><button data-t="w"><span>👛</span>Wallet</button><button data-t="i"><span>🤝</span>Invite</button></nav>
+<script>
+const MIN=200,FEE=10,CUR='KES';
+const SV=[
+ {id:'s1',t:'Mobile money habits',m:'2 min',r:20,q:[
+  ['How often do you use mobile money?',['Daily','Weekly','Monthly','Rarely']],
+  ['What do you use it for most?',['Paying bills','Shopping','Sending money','Saving']],
+  ['What matters most in a payment app?',['Low fees','Speed','Security','Rewards']]]},
+ {id:'s2',t:'Online learning',m:'3 min',r:30,q:[
+  ['Have you taken an online class?',['Yes, paid','Yes, free','No, but I want to','No']],
+  ['Preferred format?',['Live sessions','Recorded videos','Reading','1-on-1']],
+  ['Fair price for a 4-week course?',['Under 2,000','2,000-5,000','5,000-10,000','Over 10,000']],
+  ['Biggest barrier to learning online?',['Cost','Time','Data/internet','Trust']]]},
+ {id:'s3',t:'Shopping and delivery',m:'2 min',r:25,q:[
+  ['How often do you shop online?',['Weekly','Monthly','Rarely','Never']],
+  ['What worries you most?',['Fake sellers','Late delivery','Payment safety','Returns']]]}
+];
+let S={bal:0,done:[],tx:[]};
+try{const x=localStorage.getItem('sw');if(x)S=JSON.parse(x)}catch(e){}
+const $=id=>document.getElementById(id),m=n=>CUR+' '+Math.round(n).toLocaleString('en-US');
+const save=()=>{try{localStorage.setItem('sw',JSON.stringify(S))}catch(e){}};
+const now=()=>new Date().toLocaleString();
+const REF=20;
+if(!S.code){S.code='POLL'+Math.random().toString(36).slice(2,6).toUpperCase();save()}
+let tab='e',cur=null,qi=0;
+function head(){$('bal').textContent=m(S.bal);
+ $('side').textContent=tab==='e'?'Your balance':'Available to withdraw';
+ $('lim').textContent=S.bal>=MIN?'You can withdraw now':'Withdraw from '+m(MIN)+' · '+m(MIN-S.bal)+' to go'}
+function earn(){
+ tab='e';head();
+ $('v').innerHTML=SV.map(s=>{const d=S.done.includes(s.id);
+  return `<div class="card ${d?'done':''}"><div class="row"><div><h2>${s.t}</h2><span class="mut">${s.q.length} questions · ${s.m}</span></div><div class="rw">+${m(s.r)}</div></div>
+  <button class="btn" style="margin-top:12px" data-id="${s.id}" ${d?'disabled':''}>${d?'Completed':'Start survey'}</button></div>`}).join('');
+ document.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{cur=SV.find(s=>s.id===b.dataset.id);qi=0;ask()});
+}
+function ask(){
+ const q=cur.q[qi];
+ $('v').innerHTML=`<div class="card"><span class="mut">${cur.t} · ${qi+1} of ${cur.q.length}</span>
+  <div class="bar"><i style="width:${qi/cur.q.length*100}%"></i></div><h2>${q[0]}</h2>
+  ${q[1].map((o,i)=>`<button class="opt">${o}</button>`).join('')}
+  <button class="btn w" id="nx" disabled>${qi+1===cur.q.length?'Submit':'Next'}</button></div>`;
+ document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{document.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');$('nx').disabled=false});
+ $('nx').onclick=()=>{qi++;qi<cur.q.length?ask():finish()};
+}
+function finish(){
+ S.bal+=cur.r;S.done.push(cur.id);S.tx.push({k:'in',a:cur.r,n:cur.t,d:now()});save();head();
+ $('v').innerHTML=`<div class="card" style="text-align:center"><h2>Thank you!</h2><p class="rw" style="font-size:22px;margin:6px 0">+${m(cur.r)}</p><p class="mut">Added to your wallet.</p><button class="btn" id="bk">Back to surveys</button> <button class="btn" id="gw" style="background:var(--card);color:var(--ac);border:1px solid var(--ac)">Open wallet</button></div>`;
+ $('bk').onclick=earn;$('gw').onclick=()=>go('w');
+}
+function wallet(){
+ tab='w';head();
+ $('v').innerHTML=`<div class="card"><h2>Withdraw to M-Pesa</h2>
+  <label>M-Pesa phone number</label><input id="ph" type="tel" placeholder="07XX XXX XXX">
+  <label>Amount (${CUR})</label><input id="am" type="number" inputmode="numeric" placeholder="Minimum ${MIN}">
+  <div class="sum"><div><span>Fee</span><span>${m(FEE)}</span></div><div><span>You receive</span><strong id="rec">${CUR} 0</strong></div></div>
+  <button class="btn w" id="go">Withdraw</button>
+  <p class="mut">Withdrawals are reviewed before they are sent.</p></div>
+  <div class="card"><h2>History</h2>${S.tx.length?S.tx.slice().reverse().map(t=>`<div class="tx"><div><div>${t.k==='in'?t.n:'Withdrawal to '+t.ph}</div><small>${t.d}</small></div><div style="text-align:right"><div class="${t.k==='in'?'in':''}">${t.k==='in'?'+':'-'}${m(t.a)}</div>${t.k==='out'?'<span class="pill">Pending</span>':''}</div></div>`).join(''):'<p class="mut">No transactions yet. Complete a survey to earn.</p>'}</div>`;
+ $('am').oninput=()=>$('rec').textContent=m(Math.max((+$('am').value||0)-FEE,0));
+ $('go').onclick=()=>{
+  const ph=$('ph').value.replace(/\s/g,''),a=+$('am').value;
+  if(!/^(\+?254|0)\d{9}$/.test(ph)){alert('Enter a valid M-Pesa number.');return}
+  if(!a||a<MIN){alert('Minimum withdrawal is '+m(MIN)+'.');return}
+  if(a>S.bal){alert('You only have '+m(S.bal)+' available.');return}
+  if(!confirm('Withdraw '+m(a)+' to '+ph+'? You receive '+m(a-FEE)+' after the fee.'))return;
+  S.bal-=a;S.tx.push({k:'out',a,ph,d:now()});save();wallet()};
+}
+function invite(){
+ tab='i';head();
+ const msg='Join PollPesa: answer surveys and get paid to M-Pesa. Joining is free. Use my code '+S.code+' when you sign up.';
+ $('v').innerHTML=`<div class='card'><h2>Invite friends, earn ${m(REF)} each</h2><p class='mut'>You earn ${m(REF)} when a friend you invite completes their first survey.</p><div style='font-size:30px;font-weight:700;letter-spacing:3px;text-align:center;margin:12px 0;color:var(--ac)'>${S.code}</div><button class='btn w' id='sh'>Share on WhatsApp</button><button class='btn w' id='cc' style='background:var(--card);color:var(--ac);border:1px solid var(--ac);margin-top:8px'>Copy code</button></div>
+<div class='card'><h2>Have a friend's code?</h2><input id='uc' placeholder='Enter code' value='${S.used||''}'><button class='btn w' id='su'>Save code</button></div>
+<div class='card how'><h2>Referral rules</h2><ol><li>Joining is always free.</li><li>The bonus is paid only after your friend completes a first survey.</li><li>One level only: you earn from friends you invite, not from their invites.</li><li>Inviting yourself does not count.</li><li>Bonuses are confirmed after we verify your friend is a real person.</li></ol></div>
+<div class='card'><h2>Your referrals</h2><p class='mut'>No friends have joined with your code yet.</p></div>`;
+ $('sh').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+ $('cc').onclick=()=>{try{navigator.clipboard.writeText(S.code);$('cc').textContent='Copied'}catch(e){$('cc').textContent=S.code}};
+ $('su').onclick=()=>{const c=$('uc').value.trim().toUpperCase();if(!c||c===S.code){alert('Enter a code that is not your own.');return}S.used=c;save();$('su').textContent='Saved'};
+}
+function go(t){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));t==='e'?earn():t==='w'?wallet():invite()}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.t));
+earn();
+</script></body></html>
